@@ -1,0 +1,7 @@
+# gamstash
+
+https://github.com/saulvargas/gamstash.git
+cd gamstash
+./autogen.sh
+make install
+gamstash

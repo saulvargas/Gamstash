@@ -26,6 +26,8 @@ const Gamstash = new Lang.Class ({
     // Callback function for 'startup' signal builds the UI
     _onStartup: function () {
         this._buildUI ();
+
+        this._configure_media_keys();
     },
 
     // Build the application's UI
@@ -55,9 +57,6 @@ const Gamstash = new Lang.Class ({
 
         // Put the webview into the window
         this._scroll.add (this._webView);
-
-
-        this._configure_media_keys();
 
         // Show the window and all child widgets
         this._window.show_all();

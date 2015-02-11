@@ -1,7 +1,7 @@
-# gamstash
+# Download and installation intructions
 
-https://github.com/saulvargas/gamstash.git
+git clone https://github.com/saulvargas/gamstash.git
 cd gamstash
 ./autogen.sh
-make install
+make install #<-- you may need sudo here
 gamstash

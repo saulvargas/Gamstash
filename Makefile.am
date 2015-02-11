@@ -9,3 +9,7 @@ EXTRA_DIST =  \
 desktopdir = $(datadir)/applications
 desktop_DATA = \
 	gamstash.desktop
+
+#the application icon
+appicondir=/usr/share/pixmaps
+appicon_DATA=jamstash.png

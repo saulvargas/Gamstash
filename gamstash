@@ -28,27 +28,6 @@ const Gamstash = new Lang.Class ({
         this._buildUI ();
     },
 
-/*    _configureMediaKeys: function() {
-
-        const MediaKeysInterface = '<node>\
-          <interface name="org.gnome.SettingsDaemon.MediaKeys"> </interface>\
-        </node>'
-
-        const MediaKeysProxy = Gio.DBusProxy.makeProxyWrapper(MediaKeysInterface);
-
-        let mkProxy = new MediaKeysProxy(
-            Gio.DBus.session,
-            "org.gnome.SettingsDaemon",
-            "/org/gnome/SettingsDaemon/MediaKeys"
-        );
-        var conn = Gio.DBus.get_sync(Gio.BusType.SESSION, null);
-    
-        var proxy = Gio.DBusProxy.new_sync(conn, 0, null, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon/MediaKeys", "org.gnome.SettingsDaemon.MediaKeys", null);
-
-        proxy.call_sync("GrabMediaPlayerKeys", new GLib.Variant("(su)", "WebMediaKeys", 0), Gio.DBusCallFlags.NONE, 0, null);
-     }
-*/
-
     // Build the application's UI
     _buildUI: function () {
 
@@ -61,6 +40,9 @@ const Gamstash = new Lang.Class ({
             window_position: Gtk.WindowPosition.CENTER });
 
         this._window.maximize();
+
+        this._header = new Gtk.HeaderBar({title: "Gamstash", show_close_button: true});
+        this._window.set_titlebar(this._header);
 
         this._scroll = new Gtk.ScrolledWindow();
 //	g_object_set (scroll, "shadow-type", GTK_SHADOW_IN, NULL);
@@ -75,9 +57,56 @@ const Gamstash = new Lang.Class ({
         // Put the webview into the window
         this._scroll.add (this._webView);
 
+
+        this._configure_media_keys();
+
         // Show the window and all child widgets
         this._window.show_all();
 
+    },
+
+    _configure_media_keys: function() {
+
+        this._conn = Gio.DBus.get_sync(Gio.BusType.SESSION, null);
+
+        this._proxy = Gio.DBusProxy.new_sync(this._conn, Gio.DBusProxyFlags.NONE, null, "org.gnome.SettingsDaemon", "/org/gnome/SettingsDaemon/MediaKeys", "org.gnome.SettingsDaemon.MediaKeys", null);
+
+        this._proxy.call_sync("GrabMediaPlayerKeys", new GLib.Variant("(su)", "WebMediaKeys", 0), Gio.DBusCallFlags.NONE, 1, null);
+
+        this._proxy.connect("g-signal", this._control_keys(app));
+    },
+
+    _control_keys: function(app) {
+        return function(proxy, sender, signal, parameters) {
+            if (signal === "MediaPlayerKeyPressed") {
+                var action = parameters.unpack()[1].unpack();
+                if (action === "Play") {
+                    var playing = app._is_playing();
+                    if (playing) {
+                        app._webView.execute_script("$('a.hover.PauseTrack')[0].click()");
+                    } else {
+                        app._webView.execute_script("$('a.hover.PlayTrack')[0].click()");
+                    }
+                } else if (action == "Previous") {
+                    app._webView.execute_script("$('#PreviousTrack')[0].click()");
+                } else if (action == "Next") {
+                    app._webView.execute_script("$('#NextTrack')[0].click()");
+                }
+            }
+        };
+    },
+
+    _is_playing: function() {
+        var dom = this._webView.get_dom_document();
+        var play = dom.get_elements_by_class_name("PlayTrack").item(0);
+        
+        if (play === null) {
+            return false;
+        } else {
+            var style = play.get_attributes().get_named_item("style").get_node_value();
+            print(style);
+            return style !== "display: inline;";
+        }
     },
 
 });
@@ -85,3 +114,4 @@ const Gamstash = new Lang.Class ({
 // Run the application
 let app = new Gamstash ();
 app.application.run (ARGV);
+

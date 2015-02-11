@@ -45,7 +45,6 @@ const Gamstash = new Lang.Class ({
         this._window.set_titlebar(this._header);
 
         this._scroll = new Gtk.ScrolledWindow();
-//	g_object_set (scroll, "shadow-type", GTK_SHADOW_IN, NULL);
         this._window.add (this._scroll);
 
         // Create a webview to show the web app
@@ -81,12 +80,7 @@ const Gamstash = new Lang.Class ({
             if (signal === "MediaPlayerKeyPressed") {
                 var action = parameters.unpack()[1].unpack();
                 if (action === "Play") {
-                    var playing = app._is_playing();
-                    if (playing) {
-                        app._webView.execute_script("$('a.hover.PauseTrack')[0].click()");
-                    } else {
-                        app._webView.execute_script("$('a.hover.PlayTrack')[0].click()");
-                    }
+                    app._webView.execute_script("if ($('.hover.PlayTrack')[0].attributes['style'].value === 'display: none;') { $('a.hover.PauseTrack')[0].click(); } else { $('a.hover.PlayTrack')[0].click(); }");
                 } else if (action == "Previous") {
                     app._webView.execute_script("$('#PreviousTrack')[0].click()");
                 } else if (action == "Next") {
@@ -94,19 +88,6 @@ const Gamstash = new Lang.Class ({
                 }
             }
         };
-    },
-
-    _is_playing: function() {
-        var dom = this._webView.get_dom_document();
-        var play = dom.get_elements_by_class_name("PlayTrack").item(0);
-        
-        if (play === null) {
-            return false;
-        } else {
-            var style = play.get_attributes().get_named_item("style").get_node_value();
-            print(style);
-            return style !== "display: inline;";
-        }
     },
 
 });

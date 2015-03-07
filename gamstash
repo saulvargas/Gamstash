@@ -26,7 +26,11 @@ const Gamstash = new Lang.Class ({
     // Callback function for 'startup' signal builds the UI
     _onStartup: function () {
         this._buildUI ();
+        
+        // refresh button
+        this._refreshButton.connect("clicked", Lang.bind (this, function() this._webView.reload()));
 
+        // media keys
         this._configure_media_keys();
     },
 
@@ -44,6 +48,10 @@ const Gamstash = new Lang.Class ({
         this._window.maximize();
 
         this._header = new Gtk.HeaderBar({title: "Gamstash", show_close_button: true});
+
+        this._refreshButton = new Gtk.Button({image: new Gtk.Image({icon_name: "view-refresh-symbolic"})});
+        this._header.pack_start(this._refreshButton);
+        
         this._window.set_titlebar(this._header);
 
         this._scroll = new Gtk.ScrolledWindow();

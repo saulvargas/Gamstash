@@ -28,7 +28,7 @@ const Gamstash = new Lang.Class ({
         this._buildUI ();
         
         // refresh button
-        this._refreshButton.connect("clicked", Lang.bind (this, function() this._webView.reload()));
+        this._refreshButton.connect("clicked", Lang.bind(this, function() this._webView.reload()));
 
         // media keys
         this._configure_media_keys();
@@ -79,22 +79,20 @@ const Gamstash = new Lang.Class ({
 
         this._proxy.call_sync("GrabMediaPlayerKeys", new GLib.Variant("(su)", "WebMediaKeys", 0), Gio.DBusCallFlags.NONE, 1, null);
 
-        this._proxy.connect("g-signal", this._control_keys(app));
+        this._proxy.connect("g-signal", Lang.bind(this, this._control_keys));
     },
 
-    _control_keys: function(app) {
-        return function(proxy, sender, signal, parameters) {
-            if (signal === "MediaPlayerKeyPressed") {
-                var action = parameters.unpack()[1].unpack();
-                if (action === "Play") {
-                    app._webView.execute_script("if ($('.hover.PlayTrack')[0].attributes['style'].value === 'display: none;') { $('a.hover.PauseTrack')[0].click(); } else { $('a.hover.PlayTrack')[0].click(); }");
-                } else if (action == "Previous") {
-                    app._webView.execute_script("$('#PreviousTrack')[0].click()");
-                } else if (action == "Next") {
-                    app._webView.execute_script("$('#NextTrack')[0].click()");
-                }
+    _control_keys: function(proxy, sender, signal, parameters) {
+        if (signal === "MediaPlayerKeyPressed") {
+            var action = parameters.unpack()[1].unpack();
+            if (action === "Play") {
+                app._webView.execute_script("if ($('.hover.PlayTrack')[0].attributes['style'].value === 'display: none;') { $('a.hover.PauseTrack')[0].click(); } else { $('a.hover.PlayTrack')[0].click(); }");
+            } else if (action == "Previous") {
+                app._webView.execute_script("$('#PreviousTrack')[0].click()");
+            } else if (action == "Next") {
+                app._webView.execute_script("$('#NextTrack')[0].click()");
             }
-        };
+        }
     },
 
 });
